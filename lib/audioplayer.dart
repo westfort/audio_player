@@ -12,7 +12,7 @@ class AudioPlayer {
   static final MethodChannel _channel =
   MethodChannel('co.westfort.flutter/audio')
     ..setMethodCallHandler(platformCallHandler);
-  static final audioPlayers = new Map<String, AudioPlayer>();
+  static final audioPlayers = Map<String, AudioPlayer>();
 
   TimeChangeHandler durationHandler;
   TimeChangeHandler positionHandler;
@@ -66,12 +66,12 @@ class AudioPlayer {
     switch (call.method) {
       case 'audio.onDuration':
         if (player.durationHandler != null) {
-          player.durationHandler(new Duration(milliseconds: value));
+          player.durationHandler(Duration(milliseconds: value));
         }
         break;
       case 'audio.onCurrentPosition':
         if (player.positionHandler != null) {
-          player.positionHandler(new Duration(milliseconds: value));
+          player.positionHandler(Duration(milliseconds: value));
         }
         break;
       case 'audio.onComplete':

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:audioplayer/audioplayer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,30 +22,13 @@ class _AudioAppState extends State<AudioApp> {
 
   PlayerState playerState = PlayerState.stopped;
 
-  @override
-  void initState() {
-    super.initState();
-    initAudioPlayer();
-  }
-
-  void initAudioPlayer() {
-    audioPlayer = AudioPlayer();
-
-    audioPlayer.setDurationHandler((d) => setState(() {
-          print('_AudioAppState.setDurationHandler => d ${d}');
-        }));
-
-    audioPlayer.setPositionHandler((p) => setState(() {
-          print('_AudioAppState.setPositionHandler => p ${p}');
-        }));
-  }
-
   void _play() {}
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: _PlayerUiWidget(url: 'http://www.largesound.com/ashborytour/sound/brobob.mp3'),
+      child: _PlayerUiWidget(
+          url: 'http://www.largesound.com/ashborytour/sound/brobob.mp3'),
     );
   }
 }
@@ -69,8 +54,11 @@ class _PlayerUiWidgetState extends State<_PlayerUiWidget> {
   PlayerState _playerState = PlayerState.stopped;
 
   get _isPlaying => _playerState == PlayerState.playing;
+
   get _isPaused => _playerState == PlayerState.paused;
+
   get _durationText => _duration?.toString()?.split('.')?.first ?? '';
+
   get _positionText => _position?.toString()?.split('.')?.first ?? '';
 
   _PlayerUiWidgetState({@required this.url});
@@ -121,22 +109,59 @@ class _PlayerUiWidgetState extends State<_PlayerUiWidget> {
             setState(() => _volume = value);
           },
         ),
-        Slider(
-          value: _position == null ? 0.0 : _position.inMilliseconds.toDouble(),
-          min: 0.0,
-          max: _duration == null ? 0.0 : _duration.inMilliseconds.toDouble(),
-          onChanged: (double value) {
-            _audioPlayer.seek(value);
-          },
-        ),
-        new Text(
-          _position != null
-            ? "${_positionText ?? ''} / ${_durationText ?? ''}"
-            : _duration != null ? _durationText : '',
-          style: TextStyle(fontSize: 24.0),
-        ),
+        SizedBox(
+            height: 30.0,
+            child: Padding(
+                padding: EdgeInsets.only(top: 1.0),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: (TapDownDetails details) =>
+                      _seekRelativePosition(details.globalPosition),
+                  onHorizontalDragUpdate: (DragUpdateDetails details) =>
+                      _seekRelativePosition(details.globalPosition),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(left: 16.0, right: 16.0),
+                        child: LinearProgressIndicator(
+                          backgroundColor: Colors.grey,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                          value: _position != null && _position.inMilliseconds > 0
+                              ? (_position.inSeconds / _duration.inSeconds)
+                              : 0.0,
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          _position != null
+                              ? "${_positionText ?? ''} / ${_durationText ??
+                              ''}"
+                              : _duration != null ? _durationText : '',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ))),
       ],
     );
+  }
+
+  void _seekRelativePosition(Offset globalPosition) {
+    RenderBox renderBox = context.findRenderObject();
+    Offset localPosition = renderBox.globalToLocal(globalPosition);
+    double positionFraction =
+        localPosition.dx / MediaQuery.of(context).size.width;
+    positionFraction = max(0.0, positionFraction);
+    positionFraction = min(1.0, positionFraction);
+    Duration position = _duration * positionFraction;
+    _audioPlayer.seek(position.inMilliseconds.toDouble());
   }
 
   void _initAudioPlayer() {
