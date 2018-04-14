@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 
 typedef void TimeChangeHandler(Duration duration);
 typedef void ErrorHandler(String message);
@@ -13,6 +14,7 @@ class AudioPlayer {
   MethodChannel('co.westfort.flutter/audio')
     ..setMethodCallHandler(platformCallHandler);
   static final audioPlayers = Map<String, AudioPlayer>();
+  static final uuid = Uuid();
 
   TimeChangeHandler durationHandler;
   TimeChangeHandler positionHandler;
@@ -21,7 +23,7 @@ class AudioPlayer {
   String playerId;
 
   AudioPlayer() {
-    playerId = 'test';
+    playerId = uuid.v4();
     audioPlayers[playerId] = this;
   }
 

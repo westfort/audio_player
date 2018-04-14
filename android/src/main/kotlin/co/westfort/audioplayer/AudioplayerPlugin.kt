@@ -1,4 +1,4 @@
-package com.example.audioplayer
+package co.westfort.audioplayer
 
 import android.media.MediaPlayer
 import android.os.Handler

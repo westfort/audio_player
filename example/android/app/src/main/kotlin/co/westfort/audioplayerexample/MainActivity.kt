@@ -1,4 +1,4 @@
-package com.example.audioplayerexample
+package co.westfort.audioplayerexample
 
 import android.os.Bundle
 

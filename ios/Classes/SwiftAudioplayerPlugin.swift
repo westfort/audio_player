@@ -92,8 +92,8 @@ public class SwiftAudioplayerPlugin: NSObject, FlutterPlugin {
 
     private func seek(playerId: String, seek: Int) {
         let mediaPlayer = mediaPlayers[playerId]
-        mediaPlayer?.seek(to: CMTimeMakeWithSeconds(Double(seek), 1))
-        channel.invokeMethod("audio.onCurrentPosition", arguments: buildArguments(playerId: playerId, value: seek * 1000))
+        mediaPlayer?.seek(to: CMTimeMakeWithSeconds(Double(seek) * 0.001, 6000))
+        channel.invokeMethod("audio.onCurrentPosition", arguments: buildArguments(playerId: playerId, value: seek))
     }
 
     private func volume(playerId: String, volume: Float) {
